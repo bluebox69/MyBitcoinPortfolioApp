@@ -35,52 +35,40 @@ class CoinViewModel (
         }
     }
 
-    fun refreshCoin() {
-        viewModelScope.launch {
-            try {
-                _state.value = CoinState(isLoading = true)
-                val refreshedCoin = getCoinsUseCase.refreshCoinFromApi()
-                _state.value = CoinState(coin = refreshedCoin.toDomainModel())
-            } catch (e: Exception) {
-                _state.value = CoinState(error = "Error: ${e.message}")
-            }
-        }
-    }
-
 
     // Coin laden (zuerst aus Room, dann aus der API bei Bedarf)
     fun getCoin() {
         viewModelScope.launch {
             try {
-                // Lade zuerst Daten aus Room
                 _state.value = CoinState(isLoading = true)
+
+                // Daten aus Room laden
                 val localCoin = getCoinsUseCase.getCoinFromDatabase()
-                Log.d("Room", "Local Coin: $localCoin")
                 if (localCoin != null) {
                     Log.d("CoinViewModel", "Loaded from Room: $localCoin")
                     _state.value = CoinState(coin = localCoin.toDomainModel())
-                } else {
-                    // Wenn Room leer ist, API-Call durchführen
-                    getCoinsUseCase.invoke().onEach { result ->
-                        when (result) {
-                            is Resource.Success -> {
-                                Log.d("API Request", "Data received: ${result.data}")
-                                _state.value = CoinState(coin = result.data ?: Coin("", "", "", 0.0))
-                            }
-                            is Resource.Error -> {
-                                Log.e("API Request", "Error occurred: ${result.message}")
-                                _state.value = CoinState(error = result.message ?: "An unexpected error occurred")
-                            }
-                            is Resource.Loading -> {
-                                Log.d("API Request", "Loading from API...")
-                                _state.value = CoinState(isLoading = true)
-                            }
-                        }
-                    }.launchIn(viewModelScope)
                 }
+
+                // Wenn Room leer ist, API-Call durchführen
+                getCoinsUseCase.invoke().onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            Log.d("API Request", "Data received: ${result.data}")
+                            _state.value = CoinState(coin = result.data ?: Coin("", "", "", 0.0))
+                        }
+                        is Resource.Error -> {
+                            Log.e("API Request", "Error occurred: ${result.message}")
+                            _state.value = CoinState(error = result.message ?: "An unexpected error occurred")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("API Request", "Loading from API...")
+                            _state.value = CoinState(isLoading = true)
+                        }
+                    }
+                }.launchIn(viewModelScope)
             } catch (e: Exception) {
                 Log.e("CoinViewModel", "Error: ${e.message}")
-                _state.value = CoinState(error = "An error occurred: ${e.message}")
+                _state.value = CoinState(error = "Error: ${e.message}")
             }
         }
     }

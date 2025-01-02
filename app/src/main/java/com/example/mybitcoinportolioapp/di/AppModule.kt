@@ -16,6 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.room.Room
 import com.example.mybitcoinportolioapp.data.local.database.AppDatabase
 import com.example.mybitcoinportolioapp.data.local.dao.CoinDao
+import java.util.concurrent.TimeUnit
 
 
 val appModule = module {
@@ -30,6 +31,8 @@ val appModule = module {
         }
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
 
         Retrofit.Builder()

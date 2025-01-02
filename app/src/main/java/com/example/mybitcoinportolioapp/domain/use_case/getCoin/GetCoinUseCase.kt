@@ -14,31 +14,30 @@ import java.io.IOException
 class GetCoinUseCase (
     private val repository: CoinRepository
 ) {
-    // Daten aus Room laden
-    suspend fun getCoinFromDatabase(): CoinEntity? {
-        Log.d("Room", "Load Data from Database!")
-        return repository.getCoinFromDatabase()
-    }
-    //Daten von API mit Room aktuallisieren
-    suspend fun refreshCoinFromApi(): CoinEntity {
-        repository.refreshCoinFromApi()
-        return repository.getCoinFromDatabase() ?: throw Exception("Failed to refresh data")
-    }
-
     //With Resource we can emit Success , Error oder Loading
    operator fun invoke(): Flow<Resource<Coin>> = flow {
         Log.d("Room", "Load Data from API!")
         try {
            emit(Resource.Loading())
-           val coinEntity =  repository.getCoin()
-           val coin = coinEntity.toDomainModel() // Konvertiert Entity to Coin
+           val coin =  repository.getCoin()
            emit(Resource.Success(coin))
 
        } catch (e: HttpException) {
-           emit(Resource.Error(e.localizedMessage ?: "An unexpected Error occurred"))
+            val errorMessage = when (e.code()) {
+                404 -> "Coin not found. Please check the API request."
+                500 -> "Server error. Please try again later."
+                else -> "An unexpected error occurred: ${e.message()}"
+            }
+            emit(Resource.Error(errorMessage))
 
        } catch (e: IOException) { // If the API cant talk to the remote API or we have no Internet connection
             emit(Resource.Error("Check you internet connection!"))
        }
+    }
+
+    // Daten aus Room laden
+    suspend fun getCoinFromDatabase(): CoinEntity? {
+        Log.d("Room", "Load Data from Database!")
+        return repository.getCoinFromDatabase()
     }
 }

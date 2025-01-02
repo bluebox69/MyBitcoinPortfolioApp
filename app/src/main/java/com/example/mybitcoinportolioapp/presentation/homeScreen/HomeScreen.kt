@@ -42,7 +42,7 @@ fun HomeScreen(
         Text(text = "Average Price: €564564")
 
         // Buttons
-        Button(onClick = { viewModel.refreshCoin() }) {
+        Button(onClick = { viewModel.getCoin() }) {
             Text(text = "Fetch Coin")
 
         }
