@@ -1,7 +1,9 @@
 package com.example.mybitcoinportolioapp.domain.use_case.getCoin
 
+import android.util.Log
 import com.example.mybitcoinportolioapp.common.Resource
-import com.example.mybitcoinportolioapp.data.remote.dto.toCoin
+import com.example.mybitcoinportolioapp.data.local.entities.CoinEntity
+import com.example.mybitcoinportolioapp.data.local.entities.toDomainModel
 import com.example.mybitcoinportolioapp.domain.model.Coin
 import com.example.mybitcoinportolioapp.domain.repository.CoinRepository
 import kotlinx.coroutines.flow.Flow
@@ -12,11 +14,24 @@ import java.io.IOException
 class GetCoinUseCase (
     private val repository: CoinRepository
 ) {
+    // Daten aus Room laden
+    suspend fun getCoinFromDatabase(): CoinEntity? {
+        Log.d("Room", "Load Data from Database!")
+        return repository.getCoinFromDatabase()
+    }
+    //Daten von API mit Room aktuallisieren
+    suspend fun refreshCoinFromApi(): CoinEntity {
+        repository.refreshCoinFromApi()
+        return repository.getCoinFromDatabase() ?: throw Exception("Failed to refresh data")
+    }
+
     //With Resource we can emit Success , Error oder Loading
    operator fun invoke(): Flow<Resource<Coin>> = flow {
-       try {
+        Log.d("Room", "Load Data from API!")
+        try {
            emit(Resource.Loading())
-           val coin =  repository.getCoin().toCoin()
+           val coinEntity =  repository.getCoin()
+           val coin = coinEntity.toDomainModel() // Konvertiert Entity to Coin
            emit(Resource.Success(coin))
 
        } catch (e: HttpException) {

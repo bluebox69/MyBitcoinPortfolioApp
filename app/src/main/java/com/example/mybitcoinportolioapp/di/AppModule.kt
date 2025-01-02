@@ -1,5 +1,6 @@
 package com.example.mybitcoinportolioapp.di
 
+import android.content.Context
 import com.example.mybitcoinportolioapp.common.Constant.BASE_URL_COIN
 import com.example.mybitcoinportolioapp.data.remote.CoinPaprikaAPI
 import com.example.mybitcoinportolioapp.data.repository.CoinRepositoryImpl
@@ -12,6 +13,10 @@ import org.koin.dsl.module
 import org.koin.core.module.dsl.viewModelOf
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import androidx.room.Room
+import com.example.mybitcoinportolioapp.data.local.database.AppDatabase
+import com.example.mybitcoinportolioapp.data.local.dao.CoinDao
+
 
 val appModule = module {
 
@@ -36,8 +41,23 @@ val appModule = module {
     }
 
     // Repository
-    single<CoinRepository> { CoinRepositoryImpl(get()) }
+    single<CoinRepository> { CoinRepositoryImpl(get(), get()) }
+
 
     // Use Case
     single { GetCoinUseCase(get()) }
+
+    // Room-Datenbank
+    single {
+        Room.databaseBuilder(
+            get<Context>(),
+            AppDatabase::class.java,
+            "coin_database"
+        ).build()
+    }
+
+    // DAO
+    single<CoinDao> {
+        get<AppDatabase>().coinDao()
+    }
 }

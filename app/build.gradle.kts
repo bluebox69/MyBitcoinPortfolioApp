@@ -68,6 +68,7 @@ dependencies {
     //Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
+    implementation (libs.androidx.room.ktx)
 
     //gson
     implementation (libs.gson)
@@ -75,6 +76,6 @@ dependencies {
     //retrofit Network Client
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.2")
+    implementation(libs.logging.interceptor)
 
 }
