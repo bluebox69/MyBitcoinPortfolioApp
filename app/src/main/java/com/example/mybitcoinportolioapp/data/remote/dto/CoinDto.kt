@@ -33,7 +33,7 @@ data class USD(
     val percent_change_30m: Double,
     val percent_change_6h: Double,
     val percent_change_7d: Double,
-    val percent_from_price_ath: Int,
+    val percent_from_price_ath: Double,
     val price: Double,
     val volume_24h: Double,
     val volume_24h_change_24h: Double

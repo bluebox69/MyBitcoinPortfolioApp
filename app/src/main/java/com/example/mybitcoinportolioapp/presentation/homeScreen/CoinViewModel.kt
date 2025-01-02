@@ -1,5 +1,6 @@
 package com.example.mybitcoinportolioapp.presentation.homeScreen
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -18,20 +19,26 @@ class CoinViewModel (
     private val _state = mutableStateOf(CoinState())
     val state: State<CoinState> = _state
 
+    /*
     init {
-        getCoins()
+        getCoin()
     }
 
-    private fun getCoins() {
+     */
+
+    fun getCoin() {
         getCoinsUseCase().onEach { result ->
             when(result) {
                 is Resource.Success -> {
+                    Log.d("API Request", "Data received: ${result.data}")
                     _state.value = CoinState(coin = result.data ?: Coin("", "", "", 0.0))
                 }
                 is Resource.Error -> {
+                    Log.e("API Request", "Error occurred: ${result.message}")
                     _state.value = CoinState(error = result.message ?: "An unexpected error occurred")
                 }
                 is Resource.Loading -> {
+                    Log.d("API Request", "Loading...")
                     _state.value = CoinState(isLoading = true)
                 }
             }
