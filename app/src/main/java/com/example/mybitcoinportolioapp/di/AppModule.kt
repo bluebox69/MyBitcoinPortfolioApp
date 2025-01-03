@@ -25,6 +25,7 @@ import com.example.mybitcoinportolioapp.domain.repository.PortfolioRepository
 import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.GetInvestmentsUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolioUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import java.util.concurrent.TimeUnit
 
@@ -63,6 +64,7 @@ val appModule = module {
     single { GetCoinUseCase(get()) }
     single { InitializePortfolioUseCase(get()) }
     single { UpdatePortfolioUseCase(get()) }
+    single { ResetPortfolioUseCase(get(),get()) }
     single { GetInvestmentsUseCase(get()) }
     single { AddInvestmentUseCase(get(), get()) }
 

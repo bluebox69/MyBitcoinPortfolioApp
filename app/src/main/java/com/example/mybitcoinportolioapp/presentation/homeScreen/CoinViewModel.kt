@@ -14,9 +14,11 @@ import com.example.mybitcoinportolioapp.domain.use_case.getCoin.GetCoinUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.GetInvestmentsUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolioUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ class CoinViewModel (
     private val getInvestmentsUseCase: GetInvestmentsUseCase,
     private val addInvestmentUseCase: AddInvestmentUseCase,
     private val updatePortfolioUseCase: UpdatePortfolioUseCase,
+    private val resetPortfolioUseCase: ResetPortfolioUseCase
 
 
     ) : ViewModel() {
@@ -56,7 +59,7 @@ class CoinViewModel (
         }
     }
     // Initialize Portfolio
-    fun initializePortfolio() {
+    private fun initializePortfolio() {
         viewModelScope.launch {
             try {
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
@@ -93,14 +96,28 @@ class CoinViewModel (
         viewModelScope.launch {
             try {
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
-                addInvestmentUseCase(coin, quantity, purchasePrice, purchaseType)
+
+                // Fetch the latest coin data
+                val latestCoin = getCoinsUseCase.invoke().firstOrNull { result ->
+                    result is Resource.Success
+                } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
+
+                val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
+
+                addInvestmentUseCase(
+                    coin = updatedCoin,
+                    quantity = quantity,
+                    purchasePrice = updatedCoin.price,
+                    purchaseType = purchaseType
+                )
 
                 // Refresh Portfolio and Investments
                 val portfolio = initializePortfolioUseCase()
                 portfolio?.let {
                     _portfolioState.value = PortfolioState(
                         totalCash = it.totalCash,
-                        totalInvestment = it.totalInvestment
+                        totalInvestment = it.totalInvestment,
+                        lastUpdated = it.lastUpdated
                     )
                 }
                 loadInvestments()
@@ -125,6 +142,23 @@ class CoinViewModel (
                 _portfolioState.value = PortfolioState(
                     error = "Failed to update portfolio: ${e.message}"
                 )
+            }
+        }
+    }
+
+    // Reset Portfolio
+    fun resetPortfolio() {
+        viewModelScope.launch {
+            try {
+                _portfolioState.value = _portfolioState.value.copy(isLoading = true)
+                resetPortfolioUseCase()
+                _portfolioState.value = PortfolioState(
+                    totalCash = 20000.0,
+                    totalInvestment = 0.0,
+                    lastUpdated = System.currentTimeMillis()
+                )
+            } catch (e: Exception) {
+                _portfolioState.value = PortfolioState(error = "Error resetting portfolio: ${e.message}")
             }
         }
     }

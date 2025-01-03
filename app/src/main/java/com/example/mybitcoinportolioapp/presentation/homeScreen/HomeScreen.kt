@@ -77,7 +77,7 @@ fun HomeScreen(
         Button(onClick = { viewModel.addInvestment(coinState.coin, 0.01, coinState.coin.price, PurchaseType.BUY) }) {
             Text(text = "Add Investment")
         }
-        Button(onClick = { viewModel.initializePortfolio() }) {
+        Button(onClick = { viewModel.resetPortfolio() }) {
             Text(text = "Reset Portfolio")
         }
     }
