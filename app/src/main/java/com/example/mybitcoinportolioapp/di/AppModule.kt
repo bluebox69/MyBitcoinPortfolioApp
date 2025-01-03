@@ -16,6 +16,16 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.room.Room
 import com.example.mybitcoinportolioapp.data.local.database.AppDatabase
 import com.example.mybitcoinportolioapp.data.local.dao.CoinDao
+import com.example.mybitcoinportolioapp.data.local.dao.InvestmentDao
+import com.example.mybitcoinportolioapp.data.local.dao.PortfolioDao
+import com.example.mybitcoinportolioapp.data.repository.InvestmentRepositoryImpl
+import com.example.mybitcoinportolioapp.data.repository.PortfolioRepositoryImpl
+import com.example.mybitcoinportolioapp.domain.repository.InvestmentRepository
+import com.example.mybitcoinportolioapp.domain.repository.PortfolioRepository
+import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.investment.GetInvestmentsUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import java.util.concurrent.TimeUnit
 
 
@@ -45,10 +55,16 @@ val appModule = module {
 
     // Repository
     single<CoinRepository> { CoinRepositoryImpl(get(), get()) }
+    single<PortfolioRepository> { PortfolioRepositoryImpl(get()) }
+    single<InvestmentRepository> { InvestmentRepositoryImpl(get()) }
 
 
     // Use Case
     single { GetCoinUseCase(get()) }
+    single { InitializePortfolioUseCase(get()) }
+    single { UpdatePortfolioUseCase(get()) }
+    single { GetInvestmentsUseCase(get()) }
+    single { AddInvestmentUseCase(get(), get()) }
 
     // Room-Datenbank
     single {
@@ -56,11 +72,19 @@ val appModule = module {
             get<Context>(),
             AppDatabase::class.java,
             "coin_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     // DAO
     single<CoinDao> {
         get<AppDatabase>().coinDao()
+    }
+    single<PortfolioDao> {
+        get<AppDatabase>().portfolioDao()
+    }
+    single<InvestmentDao> {
+        get<AppDatabase>().investmentDao()
     }
 }

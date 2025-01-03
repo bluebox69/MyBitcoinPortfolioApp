@@ -1,4 +1,4 @@
-package com.example.mybitcoinportolioapp.presentation.homeScreen
+package com.example.mybitcoinportolioapp.presentation.homeScreen.state
 
 import com.example.mybitcoinportolioapp.domain.model.Coin
 
