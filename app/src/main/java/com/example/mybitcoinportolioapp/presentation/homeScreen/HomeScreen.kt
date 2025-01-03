@@ -38,6 +38,7 @@ fun HomeScreen(
                 Text(text = "Price: $${coin.price}")
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
         // Display Portfolio
         Text(text = "Dein Portfolio:")
         if (portfolioState.isLoading) {
@@ -62,7 +63,7 @@ fun HomeScreen(
                 Text(text = "Quantity: ${investment.quantity}")
                 Text(text = "Price: €${investment.purchasePrice}")
                 Text(text = "Type: ${investment.purchaseType}")
-                Text(text = "Type: ${investment.date.toReadableDate()}")
+                Text(text = "Date: ${investment.date.toReadableDate()}")
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -74,7 +75,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = { viewModel.addInvestment(coinState.coin, 0.01, coinState.coin.price, PurchaseType.BUY) }) {
+        Button(onClick = { viewModel.addInvestment(coinState.coin, 0.1, coinState.coin.price, PurchaseType.BUY) }) {
             Text(text = "Add Investment")
         }
         Button(onClick = { viewModel.resetPortfolio() }) {
