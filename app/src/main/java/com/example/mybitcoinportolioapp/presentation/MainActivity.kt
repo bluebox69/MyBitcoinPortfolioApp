@@ -1,22 +1,21 @@
 package com.example.mybitcoinportolioapp.presentation
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.mybitcoinportolioapp.presentation.homeScreen.HomeScreen
-import com.example.mybitcoinportolioapp.presentation.ui.theme.IceBlue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.navigation.compose.rememberNavController
+import com.example.mybitcoinportolioapp.R
+import com.example.mybitcoinportolioapp.presentation.navigation.BottomNavItem
+import com.example.mybitcoinportolioapp.presentation.navigation.BottomNavigationBar
+import com.example.mybitcoinportolioapp.presentation.navigation.Navigation
 import com.example.mybitcoinportolioapp.presentation.ui.theme.MyBitcoinPortolioAppTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,34 +23,48 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyBitcoinPortolioAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column {
-                        Greeting(
-                            name = "Pauul",
-                            modifier = Modifier.padding(innerPadding)
-                                .padding(20.dp)
-                                .background(IceBlue)
-                        )
-                        HomeScreen()
-                    }
-                }
+                MyApp()
             }
         }
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyBitcoinPortolioAppTheme {
-        Greeting("Android")
+fun MyApp() {
+    val navController = rememberNavController()
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar (
+                items = listOf(
+                    BottomNavItem(
+                        name = "Home",
+                        route = "home",
+                        icon = ImageVector.vectorResource(id = R.drawable.home_trend_up)
+                    ),
+                    BottomNavItem(
+                        name = "Buy",
+                        route = "buy",
+                        icon = ImageVector.vectorResource(id = R.drawable.wallet_add)
+                    ),
+                    BottomNavItem(
+                        name = "Sell",
+                        route = "sell",
+                        icon = ImageVector.vectorResource(id = R.drawable.empty_wallet)
+                    ),
+                    BottomNavItem(
+                        name = "Settings",
+                        route = "settings",
+                        icon = ImageVector.vectorResource(id = R.drawable.setting_3)
+                    ),
+                ),
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route)
+                }
+            )
+        }
+    ) {
+        Navigation(navController = navController)
     }
 }
