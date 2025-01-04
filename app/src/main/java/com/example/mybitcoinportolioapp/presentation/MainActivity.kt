@@ -14,6 +14,7 @@ import com.example.mybitcoinportolioapp.R
 import com.example.mybitcoinportolioapp.presentation.navigation.BottomNavItem
 import com.example.mybitcoinportolioapp.presentation.navigation.BottomNavigationBar
 import com.example.mybitcoinportolioapp.presentation.navigation.Navigation
+import com.example.mybitcoinportolioapp.presentation.navigation.TopBar
 import com.example.mybitcoinportolioapp.presentation.ui.theme.MyBitcoinPortolioAppTheme
 
 
@@ -34,6 +35,9 @@ class MainActivity : ComponentActivity() {
 fun MyApp() {
     val navController = rememberNavController()
     Scaffold(
+        topBar = {
+            TopBar(navController = navController)
+        },
         bottomBar = {
             BottomNavigationBar (
                 items = listOf(
