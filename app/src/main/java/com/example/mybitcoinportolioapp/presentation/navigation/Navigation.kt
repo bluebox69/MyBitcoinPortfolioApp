@@ -1,6 +1,7 @@
 package com.example.mybitcoinportolioapp.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,10 +12,11 @@ import com.example.mybitcoinportolioapp.presentation.settingsScreen.SettingsScre
 
 
 @Composable
-fun Navigation(navController: NavHostController) {
+fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "home",
+        modifier = modifier
     ) {
         composable("home") { HomeScreen() }
         composable("buy") { BuyScreen() }
