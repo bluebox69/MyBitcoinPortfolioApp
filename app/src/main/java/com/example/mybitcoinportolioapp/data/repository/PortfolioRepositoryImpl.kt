@@ -9,7 +9,14 @@ class PortfolioRepositoryImpl(
 ) : PortfolioRepository {
     override suspend fun getPortfolio(): PortfolioEntity? = dao.getPortfolio()
 
-    override suspend fun updatePortfolio(totalCash: Double, totalInvestment: Double, lastUpdated: Long) {
+    override suspend fun updatePortfolio(
+        totalCash: Double,
+        totalInvestment: Double,
+        lastUpdated: Long,
+        coinName: String,
+        coinSymbol: String,
+        totalAmount: Double
+    ) {
         val currentPortfolio = dao.getPortfolio()
 
         if (currentPortfolio != null) {
@@ -18,14 +25,20 @@ class PortfolioRepositoryImpl(
                 id = currentPortfolio.id,
                 totalCash = totalCash,
                 totalInvestment = totalInvestment,
-                lastUpdated = lastUpdated
+                lastUpdated = lastUpdated,
+                coinName = coinName,
+                coinSymbol = coinSymbol,
+                totalAmount = totalAmount
             )
         } else {
             // Wenn kein Portfolio existiert, ein neues erstellen
             val newPortfolio = PortfolioEntity(
                 totalCash = totalCash,
                 totalInvestment = totalInvestment,
-                lastUpdated = lastUpdated
+                lastUpdated = lastUpdated,
+                coinName = coinName,
+                coinSymbol = coinSymbol,
+                totalAmount = totalAmount
             )
             dao.insertOrUpdatePortfolio(newPortfolio)
         }

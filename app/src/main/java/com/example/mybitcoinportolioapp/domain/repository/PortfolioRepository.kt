@@ -4,5 +4,12 @@ import com.example.mybitcoinportolioapp.data.local.entities.PortfolioEntity
 
 interface PortfolioRepository {
     suspend fun getPortfolio(): PortfolioEntity?
-    suspend fun updatePortfolio(totalCash: Double, totalInvestment: Double, lastUpdated: Long)
+    suspend fun updatePortfolio(
+        totalCash: Double,
+        totalInvestment: Double,
+        lastUpdated: Long,
+        coinName: String,
+        coinSymbol: String,
+        totalAmount: Double
+    )
 }

@@ -4,6 +4,9 @@ data class PortfolioState(
     val totalCash: Double = 0.0,
     val totalInvestment: Double = 0.0,
     val lastUpdated: Long = 0L,
+    val coinName: String = "",
+    val coinSymbol: String = "",
+    val totalAmount: Double = 0.0,
     val isLoading: Boolean = false,
     val error: String = ""
 

@@ -117,7 +117,8 @@ class CoinViewModel (
                     _portfolioState.value = PortfolioState(
                         totalCash = it.totalCash,
                         totalInvestment = it.totalInvestment,
-                        lastUpdated = it.lastUpdated
+                        lastUpdated = it.lastUpdated,
+                        totalAmount = it.totalAmount
                     )
                 }
                 loadInvestments()
@@ -129,14 +130,31 @@ class CoinViewModel (
         }
     }
     // Update Portfolio (if needed)
-    fun updatePortfolio(totalCash: Double, totalInvestment: Double, lastUpdated: Long) {
+    fun updatePortfolio(
+        totalCash: Double,
+        totalInvestment: Double,
+        lastUpdated: Long,
+        coinName: String,
+        coinSymbol: String,
+        totalAmount: Double
+    ) {
         viewModelScope.launch {
             try {
-                updatePortfolioUseCase(totalCash, totalInvestment, lastUpdated)
+                updatePortfolioUseCase(
+                    totalCash,
+                    totalInvestment,
+                    lastUpdated,
+                    coinName,
+                    coinSymbol,
+                    totalAmount
+                    )
                 _portfolioState.value = PortfolioState(
                     totalCash = totalCash,
                     totalInvestment = totalInvestment,
-                    lastUpdated = lastUpdated
+                    lastUpdated = lastUpdated,
+                    coinName = coinName,
+                    coinSymbol = coinSymbol,
+                    totalAmount = totalAmount
                 )
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(
@@ -155,7 +173,8 @@ class CoinViewModel (
                 _portfolioState.value = PortfolioState(
                     totalCash = 20000.0,
                     totalInvestment = 0.0,
-                    lastUpdated = System.currentTimeMillis()
+                    lastUpdated = System.currentTimeMillis(),
+                    totalAmount = 0.0
                 )
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(error = "Error resetting portfolio: ${e.message}")

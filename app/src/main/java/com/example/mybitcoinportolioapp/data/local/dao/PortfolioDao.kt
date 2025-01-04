@@ -15,6 +15,6 @@ interface PortfolioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdatePortfolio(portfolio: PortfolioEntity)
 
-    @Query("UPDATE portfolio SET totalcash = :totalCash, totalinvestment = :totalInvestment, lastupdated = :lastUpdated WHERE id = :id")
-    suspend fun updatePortfolioFields(id: Int, totalCash: Double, totalInvestment: Double, lastUpdated: Long)
+    @Query("UPDATE portfolio SET totalcash = :totalCash, totalinvestment = :totalInvestment, lastUpdated = :lastUpdated, coinName = :coinName, coinSymbol = :coinSymbol, totalAmount = :totalAmount WHERE id = :id")
+    suspend fun updatePortfolioFields(id: Int, totalCash: Double, totalInvestment: Double, lastUpdated: Long, coinName: String, coinSymbol: String, totalAmount: Double )
 }

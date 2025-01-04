@@ -42,10 +42,14 @@ class AddInvestmentUseCase(
             portfolio?.let {
                 val updatedCash = it.totalCash - (quantity * purchasePrice)
                 val updatedInvestment = it.totalInvestment + (quantity * purchasePrice)
+                val updatedAmount = it.totalAmount + quantity
                 portfolioRepository.updatePortfolio(
                     updatedCash,
                     updatedInvestment,
-                    lastUpdated = System.currentTimeMillis()
+                    lastUpdated = System.currentTimeMillis(),
+                    coinName = "Bitcoin",
+                    coinSymbol = "BTC",
+                    updatedAmount
                 )
             }
         } else {

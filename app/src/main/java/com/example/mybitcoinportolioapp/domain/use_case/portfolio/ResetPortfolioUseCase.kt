@@ -12,7 +12,10 @@ class ResetPortfolioUseCase(
         portfolioRepository.updatePortfolio(
             totalCash = 20000.0,
             totalInvestment = 0.0,
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = System.currentTimeMillis(),
+            coinName = "Bitcoin",
+            coinSymbol = "BTC",
+            totalAmount = 0.0
         )
         // Clear all investments
         investmentRepository.clearInvestments()

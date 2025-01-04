@@ -8,5 +8,8 @@ data class PortfolioEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val totalCash: Double,
     val totalInvestment: Double = 0.0,
-    val lastUpdated: Long
+    val lastUpdated: Long,
+    val coinName: String,
+    val coinSymbol: String,
+    val totalAmount: Double
 )

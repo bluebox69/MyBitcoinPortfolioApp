@@ -46,8 +46,9 @@ fun HomeScreen(
         } else if (portfolioState.error.isNotEmpty()) {
             Text(text = "Portfolio Error: ${portfolioState.error}")
         } else {
-            Text(text = "Total Cash: €${String.format("%.2f", portfolioState.totalCash)}")
-            Text(text = "Total Investment: €${String.format("%.2f", portfolioState.totalInvestment)}")
+            Text(text = "Total Cash: $${String.format("%.2f", portfolioState.totalCash)}")
+            Text(text = "Total Investment: $${String.format("%.2f", portfolioState.totalInvestment)}")
+            Text(text = "Total Amount: ${portfolioState.totalAmount}")
             Text(text = "Last Update: ${portfolioState.lastUpdated.toReadableDate()}")
         }
 
@@ -61,7 +62,7 @@ fun HomeScreen(
             investments.forEach { investment ->
                 Text(text = "Coin: ${investment.coinName} (${investment.coinSymbol})")
                 Text(text = "Quantity: ${investment.quantity}")
-                Text(text = "Price: €${investment.purchasePrice}")
+                Text(text = "Price: $${investment.purchasePrice}")
                 Text(text = "Type: ${investment.purchaseType}")
                 Text(text = "Date: ${investment.date.toReadableDate()}")
                 Spacer(modifier = Modifier.height(8.dp))

@@ -12,7 +12,14 @@ class InitializePortfolioUseCase(
 
         // Wenn kein Portfolio existiert, initialisiere es mit Standardwerten
         if (portfolio == null) {
-            portfolioRepository.updatePortfolio(totalCash = 20000.0, totalInvestment = 0.0, lastUpdated = System.currentTimeMillis())
+            portfolioRepository.updatePortfolio(
+                totalCash = 20000.0,
+                totalInvestment = 0.0,
+                lastUpdated = System.currentTimeMillis(),
+                coinName = "Bitcoin",
+                coinSymbol = "BTC",
+                totalAmount = 0.0
+                )
             portfolio = portfolioRepository.getPortfolio()
         }
         return portfolio ?: throw Exception("Failed to initialize portfolio")
