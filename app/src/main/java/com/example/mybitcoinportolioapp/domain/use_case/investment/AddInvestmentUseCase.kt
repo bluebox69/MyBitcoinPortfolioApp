@@ -16,13 +16,21 @@ class AddInvestmentUseCase(
 
 
         if (portfolio != null) {
-            val requiredCash = quantity * purchasePrice
+            val investmentCosts = quantity * purchasePrice
 
             // Überprüfen, ob genug Cash vorhanden ist
-            if (portfolio.totalCash < requiredCash) {
+            if (portfolio.totalCash < investmentCosts && purchaseType == PurchaseType.BUY) {
                 Log.d(
                     "AddInvestmentUseCase",
-                    "Insufficient funds: Required = $requiredCash, Available = ${portfolio.totalCash}"
+                    "Insufficient funds: Required = $investmentCosts, Available = ${portfolio.totalCash}"
+                )
+                return // Abbruch
+            }
+            //Überprüfen ob genügen Coins für den Verkauf vorhanden sind
+            if (portfolio.totalAmount < quantity && purchaseType == PurchaseType.SELL) {
+                Log.d(
+                    "AddInvestmentUseCase",
+                    "Insufficient Coin Amount: Required = $quantity, Available = ${portfolio.totalAmount}"
                 )
                 return // Abbruch
             }
@@ -34,15 +42,27 @@ class AddInvestmentUseCase(
                 quantity = quantity,
                 purchasePrice = purchasePrice,
                 date = System.currentTimeMillis(),
-                purchaseType = purchaseType
+                purchaseType = purchaseType,
+                investmentCost = investmentCosts
             )
             investmentRepository.addInvestment(investment)
 
             // Portfolio aktualisieren
+            var updatedCash = 0.0
+            var updatedInvestment = 0.0
+            var updatedAmount = 0.0
+
             portfolio?.let {
-                val updatedCash = it.totalCash - (quantity * purchasePrice)
-                val updatedInvestment = it.totalInvestment + (quantity * purchasePrice)
-                val updatedAmount = it.totalAmount + quantity
+                if (purchaseType == PurchaseType.BUY) {
+                    updatedCash = it.totalCash - investmentCosts
+                    updatedInvestment = it.totalInvestment + investmentCosts
+                    updatedAmount = it.totalAmount + quantity
+                }
+                if (purchaseType == PurchaseType.SELL) {
+                    updatedCash = it.totalCash + investmentCosts
+                    updatedInvestment = it.totalInvestment - investmentCosts
+                    updatedAmount = it.totalAmount - quantity
+                }
                 portfolioRepository.updatePortfolio(
                     updatedCash,
                     updatedInvestment,

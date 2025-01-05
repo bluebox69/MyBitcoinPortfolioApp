@@ -14,7 +14,7 @@ import com.example.mybitcoinportolioapp.data.local.entities.purchaseType.Convert
 
 @Database(
     entities = [CoinEntity::class, PortfolioEntity::class, InvestmentEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

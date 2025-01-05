@@ -13,5 +13,6 @@ data class InvestmentEntity(
     val purchaseType: PurchaseType,  //Typ Buy or Sell
     val quantity: Double,
     val purchasePrice: Double,
-    val date: Long // Timestamp
+    val date: Long,
+    val investmentCost: Double
 )

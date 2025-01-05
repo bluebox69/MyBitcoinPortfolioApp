@@ -23,7 +23,7 @@ fun TestHomescreen(
     val scrollState = rememberScrollState()
     val coinState = viewModel.state.value
     val portfolioState = viewModel.portfolioState.value
-    var investments = viewModel.investmentsState.value
+    val investments = viewModel.investmentsState.value
 
     Column(
         modifier = Modifier.verticalScroll(scrollState)
@@ -60,20 +60,6 @@ fun TestHomescreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Display Investments
-        Text(text = "Investments:")
-        if (investments.isEmpty()) {
-            Text(text = "No investments available.")
-        } else {
-            investments.forEach { investment ->
-                Text(text = "Coin: ${investment.coinName} (${investment.coinSymbol})")
-                Text(text = "Quantity: ${investment.quantity}")
-                Text(text = "Price: $${investment.purchasePrice}")
-                Text(text = "Type: ${investment.purchaseType}")
-                Text(text = "Date: ${investment.date.toReadableDate()}")
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
 
         // Buttons
         Button(onClick = { viewModel.getCoin() }) {
@@ -85,7 +71,7 @@ fun TestHomescreen(
         Button(onClick = { viewModel.addInvestment(coinState.coin, 0.1, coinState.coin.price, PurchaseType.BUY) }) {
             Text(text = "Add Investment")
         }
-        Button(onClick = { viewModel.addInvestment(coinState.coin, -0.1, coinState.coin.price, PurchaseType.SELL) }) {
+        Button(onClick = { viewModel.addInvestment(coinState.coin, 0.1, coinState.coin.price, PurchaseType.SELL) }) {
             Text(text = "Sell Investment")
         }
         Button(onClick = { viewModel.resetPortfolio() }) {

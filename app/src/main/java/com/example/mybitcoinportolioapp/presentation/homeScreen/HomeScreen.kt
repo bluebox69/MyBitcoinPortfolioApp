@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,12 +28,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.mybitcoinportolioapp.R
 import com.example.mybitcoinportolioapp.common.toReadableDate
 import com.example.mybitcoinportolioapp.data.local.entities.purchaseType.PurchaseType
 import com.example.mybitcoinportolioapp.presentation.homeScreen.component.CustomButton
 import com.example.mybitcoinportolioapp.presentation.homeScreen.component.InvestmentCard
 import com.example.mybitcoinportolioapp.presentation.ui.theme.FontFamilies
+import com.example.mybitcoinportolioapp.presentation.ui.theme.LightBlack
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightRed
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightYellow
 import com.example.mybitcoinportolioapp.presentation.ui.theme.MyGreen
@@ -42,8 +46,10 @@ import java.text.DecimalFormat
 @SuppressLint("DefaultLocale")
 @Composable
 fun HomeScreen(
-    viewModel: CoinViewModel = koinViewModel() // get ViewModel
+    viewModel: CoinViewModel = koinViewModel(),
+    navController: NavController
 ) {
+    val scrollState = rememberScrollState()
     val coinState = viewModel.state.value
     val portfolioState = viewModel.portfolioState.value
     val investments = viewModel.investmentsState.value
@@ -55,6 +61,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -86,7 +93,7 @@ fun HomeScreen(
                 fontWeight = FontWeight.Normal,
                 color = Color.Black
             )
-            IconButton(onClick = { viewModel.getCoin() }) {
+            IconButton(onClick = { viewModel.refreshPortfolio() }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),
                     contentDescription = "Refresh Coin Data",
@@ -103,30 +110,50 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "$${decimalFormat.format(portfolioState.totalInvestment + portfolioState.totalCash)}",
+                text = "$${decimalFormat.format(portfolioState.currentPortfolioValue + portfolioState.totalCash)}",
                 fontSize = 45.sp,
                 fontFamily = FontFamilies.fontFamily1,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(4.dp))
-            portfolioState.performancePercentage?.let { performance ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
-                    text = if (performance >= 0) "+${decimalFormat.format(performance)}%" else "${decimalFormat.format(performance)}%",
+                    text = "$${decimalFormat.format(portfolioState.profitOrLoss)}",
                     fontSize = 18.sp,
-                    fontFamily = FontFamilies.fontFamily2,
+                    fontFamily = FontFamilies.fontFamily1,
                     fontWeight = FontWeight.Light,
-                    color = if (performance > 0) {
-                        MyGreen
-                    } else if (performance < 0) {
+                    color = if (portfolioState.profitOrLoss < 0) {
                         MyRed
                     } else {
-                        Color.Black
+                        LightBlack
                     }
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                portfolioState.performancePercentage?.let { performance ->
+                    Text(
+                        text = if (performance >= 0) "+${decimalFormat.format(performance)}%" else "${decimalFormat.format(performance)}%",
+                        fontSize = 18.sp,
+                        fontFamily = FontFamilies.fontFamily1,
+                        fontWeight = FontWeight.Light,
+                        color = if (performance > 0) {
+                            MyGreen
+                        } else if (performance < 0) {
+                            MyRed
+                        } else {
+                            Color.Black
+                        }
+                    )
+                }
             }
         }
-
+        //Investment
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -143,7 +170,7 @@ fun HomeScreen(
             Text(
                 text = "Cash: $${decimalFormat.format(portfolioState.totalCash)}",
                 fontSize = 20.sp,
-                fontFamily = FontFamilies.fontFamily2,
+                fontFamily = FontFamilies.fontFamily1,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black
             )
@@ -173,7 +200,7 @@ fun HomeScreen(
                     .weight(1f)
                     .fillMaxWidth(),
                 buttonOnClick = {
-                    // Your onClick logic here
+                    navController.navigate("buy")
                 }
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -185,11 +212,12 @@ fun HomeScreen(
                     .weight(1f)
                     .fillMaxWidth(),
                 buttonOnClick = {
-                    // Your onClick logic here
+                    navController.navigate("sell")
                 }
             )
 
         }
+        //Transactions
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
@@ -201,11 +229,11 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth()
         )
         // Investments List
-        LazyColumn(
+        Column (
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(investments) {
+            investments.forEach {
                 InvestmentCard(
                     painter = painterResource(
                         id = if (it.purchaseType == PurchaseType.BUY) R.drawable.icon_buy
@@ -216,7 +244,7 @@ fun HomeScreen(
                     coinSymbol = it.coinSymbol,
                     coinMetaInfo = it.date.toReadableDate(),
                     coinAmount = it.quantity,
-                    coinValue = it.purchasePrice,
+                    coinValue = it.investmentCost,
                     iconSize = 38,
                     modifier = Modifier
                 )

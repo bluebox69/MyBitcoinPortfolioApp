@@ -104,6 +104,24 @@ class CoinViewModel (
             }
         }
     }
+    //Performance calculation
+    private fun calculatePortfolioPerformance(currentBitcoinPrice: Double) {
+        val portfolio = _portfolioState.value
+
+        val totalValueNow = portfolio.totalAmount * currentBitcoinPrice
+        val profitOrLoss = totalValueNow - portfolio.totalInvestment
+        val percentageChange = if (portfolio.totalInvestment != 0.0) {
+            (profitOrLoss / portfolio.totalInvestment) * 100
+        } else {
+            0.0
+        }
+
+        _portfolioState.value = portfolio.copy(
+            currentPortfolioValue = totalValueNow,
+            profitOrLoss = profitOrLoss,
+            performancePercentage = percentageChange
+        )
+    }
 
     // Add Investment
     fun addInvestment(coin: Coin, quantity: Double, purchasePrice: Double, purchaseType: PurchaseType) {
@@ -117,13 +135,13 @@ class CoinViewModel (
                 } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
 
                 val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
-                val priceAtPayment = quantity * updatedCoin.price
+                val priceAtPayment = updatedCoin.price
 
                 addInvestmentUseCase(
                     coin = updatedCoin,
                     quantity = quantity,
                     purchasePrice = priceAtPayment,
-                    purchaseType = purchaseType
+                    purchaseType = purchaseType,
                 )
 
                 // Refresh Portfolio and Investments
@@ -137,6 +155,7 @@ class CoinViewModel (
                     )
                 }
                 loadInvestments()
+                calculatePortfolioPerformance(updatedCoin.price)
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(
                     error = "Failed to add investment: ${e.message}"
@@ -144,6 +163,39 @@ class CoinViewModel (
             }
         }
     }
+    //refresh Portfolio
+    fun refreshPortfolio() {
+        viewModelScope.launch {
+            try {
+                _portfolioState.value = _portfolioState.value.copy(isLoading = true)
+                // Fetch the latest coin data
+                val latestCoin = getCoinsUseCase.invoke().firstOrNull { result ->
+                    result is Resource.Success
+                } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
+
+                val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
+                // Refresh Portfolio and Investments
+                val portfolio = initializePortfolioUseCase()
+                portfolio?.let {
+                    _portfolioState.value = PortfolioState(
+                        totalCash = it.totalCash,
+                        totalInvestment = it.totalInvestment,
+                        lastUpdated = System.currentTimeMillis(),
+                        totalAmount = it.totalAmount,
+                        coinName = it.coinName,
+                        coinSymbol = it.coinSymbol
+                    )
+                }
+                calculatePortfolioPerformance(updatedCoin.price)
+            } catch (e: Exception) {
+                _portfolioState.value = PortfolioState(
+                    error = "Failed to refresh Portfolio: ${e.message}"
+                )
+            }
+        }
+
+    }
+
     // Update Portfolio (if needed)
     fun updatePortfolio(
         totalCash: Double,
@@ -189,7 +241,11 @@ class CoinViewModel (
                     totalCash = 20000.0,
                     totalInvestment = 0.0,
                     lastUpdated = System.currentTimeMillis(),
-                    totalAmount = 0.0
+                    totalAmount = 0.0,
+                    currentPortfolioValue = 0.0,
+                    profitOrLoss = 0.0,
+                    performancePercentage = 0.0,
+
                 )
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(error = "Error resetting portfolio: ${e.message}")
@@ -217,6 +273,7 @@ class CoinViewModel (
                         is Resource.Success -> {
                             Log.d("API Request", "Data received: ${result.data}")
                             _state.value = CoinState(coin = result.data ?: Coin("", "", "", 0.0))
+                            calculatePortfolioPerformance(_state.value.coin.price)
                         }
                         is Resource.Error -> {
                             Log.e("API Request", "Error occurred: ${result.message}")
