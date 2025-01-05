@@ -33,6 +33,7 @@ fun TopBar(navController: NavController) {
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color.Black,
             titleContentColor = LightYellow
+
         ),
         title = {
             Row(verticalAlignment = Alignment.Bottom) {

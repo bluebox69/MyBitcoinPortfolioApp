@@ -7,6 +7,7 @@ data class PortfolioState(
     val coinName: String = "",
     val coinSymbol: String = "",
     val totalAmount: Double = 0.0,
+    val performancePercentage: Double? = null,
     val isLoading: Boolean = false,
     val error: String = ""
 

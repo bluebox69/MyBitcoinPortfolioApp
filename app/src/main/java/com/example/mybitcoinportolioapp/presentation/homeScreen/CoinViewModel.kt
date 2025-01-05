@@ -45,6 +45,7 @@ class CoinViewModel (
 
     init {
         loadCoinFromDatabase()
+        getCoin()
         initializePortfolio()
         loadInvestments()
     }
@@ -65,10 +66,15 @@ class CoinViewModel (
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 val portfolio = initializePortfolioUseCase()
                 portfolio?.let {
+                    val performance = calculatePerformance(it.totalInvestment, it.totalAmount)
                     _portfolioState.value = PortfolioState(
+                        coinName = it.coinName,
+                        coinSymbol = it.coinSymbol,
                         totalCash = it.totalCash,
                         totalInvestment = it.totalInvestment,
-                        lastUpdated = it.lastUpdated
+                        lastUpdated = System.currentTimeMillis(),
+                        totalAmount = it.totalAmount,
+                        performancePercentage = performance
                     )
                 }
             } catch (e: Exception) {
@@ -76,6 +82,14 @@ class CoinViewModel (
                     error = "Failed to initialize portfolio: ${e.message}"
                 )
             }
+        }
+    }
+
+    private fun calculatePerformance(totalInvestment: Double, totalAmount: Double): Double {
+        return if (totalInvestment != 0.0) {
+            ((totalAmount - totalInvestment) / totalInvestment) * 100
+        } else {
+            0.0
         }
     }
 
@@ -103,11 +117,12 @@ class CoinViewModel (
                 } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
 
                 val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
+                val priceAtPayment = quantity * updatedCoin.price
 
                 addInvestmentUseCase(
                     coin = updatedCoin,
                     quantity = quantity,
-                    purchasePrice = updatedCoin.price,
+                    purchasePrice = priceAtPayment,
                     purchaseType = purchaseType
                 )
 
@@ -117,7 +132,7 @@ class CoinViewModel (
                     _portfolioState.value = PortfolioState(
                         totalCash = it.totalCash,
                         totalInvestment = it.totalInvestment,
-                        lastUpdated = it.lastUpdated,
+                        lastUpdated = System.currentTimeMillis(),
                         totalAmount = it.totalAmount
                     )
                 }
@@ -151,7 +166,7 @@ class CoinViewModel (
                 _portfolioState.value = PortfolioState(
                     totalCash = totalCash,
                     totalInvestment = totalInvestment,
-                    lastUpdated = lastUpdated,
+                    lastUpdated = System.currentTimeMillis(),
                     coinName = coinName,
                     coinSymbol = coinSymbol,
                     totalAmount = totalAmount

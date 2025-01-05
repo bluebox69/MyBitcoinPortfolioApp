@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.mybitcoinportolioapp.presentation.buyScreen.BuyScreen
 import com.example.mybitcoinportolioapp.presentation.homeScreen.HomeScreen
+import com.example.mybitcoinportolioapp.presentation.homeScreen.TestHomescreen
 import com.example.mybitcoinportolioapp.presentation.sellScreen.SellScreen
 import com.example.mybitcoinportolioapp.presentation.settingsScreen.SettingsScreen
 
@@ -19,7 +20,7 @@ fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) 
         modifier = modifier
     ) {
         composable("home") { HomeScreen() }
-        composable("buy") { BuyScreen() }
+        composable("buy") { TestHomescreen() }
         composable("sell") { SellScreen() }
         composable("settings") { SettingsScreen() }
     }

@@ -5,6 +5,6 @@ import java.util.*
 
 fun Long.toReadableDate(): String {
     val date = Date(this)
-    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    val format = SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault())
     return format.format(date)
 }
