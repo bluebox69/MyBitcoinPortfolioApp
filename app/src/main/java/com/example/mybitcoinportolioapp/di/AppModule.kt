@@ -29,6 +29,7 @@ import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolio
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.buyScreen.BuyViewModel
 import com.example.mybitcoinportolioapp.presentation.sellScreen.SellViewModel
+import com.example.mybitcoinportolioapp.presentation.settingsScreen.SettingViewModel
 import java.util.concurrent.TimeUnit
 
 
@@ -38,6 +39,7 @@ val appModule = module {
     viewModelOf(::CoinViewModel)
     viewModelOf(::BuyViewModel)
     viewModelOf(::SellViewModel)
+    viewModelOf(::SettingViewModel)
 
     // Retrofit API
     single<CoinPaprikaAPI> {
