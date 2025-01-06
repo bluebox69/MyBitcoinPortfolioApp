@@ -18,12 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.VectorProperty
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,7 +51,6 @@ import com.example.mybitcoinportolioapp.presentation.ui.theme.LightYellow
 import org.koin.androidx.compose.koinViewModel
 import java.text.DecimalFormat
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import com.example.mybitcoinportolioapp.common.showToast
 
 
@@ -139,7 +135,7 @@ fun BuyScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "1 BTC = $${decimalFormat2.format(coinState.coin.price)}",
+                    text = "1 BTC = $${decimalFormat.format(coinState.coin.price)}",
                     fontSize = 28.sp,
                     fontFamily = FontFamilies.fontFamily1,
                     fontWeight = FontWeight.Normal,

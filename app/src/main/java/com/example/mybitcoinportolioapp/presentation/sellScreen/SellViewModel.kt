@@ -1,4 +1,4 @@
-package com.example.mybitcoinportolioapp.presentation.buyScreen
+package com.example.mybitcoinportolioapp.presentation.sellScreen
 
 import android.util.Log
 import androidx.compose.runtime.State
@@ -14,6 +14,7 @@ import com.example.mybitcoinportolioapp.domain.model.Coin
 import com.example.mybitcoinportolioapp.domain.use_case.getCoin.GetCoinUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
+import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,9 +24,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class BuyViewModel(
+class SellViewModel(
     private val getCoinUseCase: GetCoinUseCase,
     private val addInvestmentUseCase: AddInvestmentUseCase,
+    private val updatePortfolioUseCase: UpdatePortfolioUseCase,
     private val initializePortfolioUseCase: InitializePortfolioUseCase,
 
     ) : ViewModel() {
@@ -39,8 +41,8 @@ class BuyViewModel(
     private val _investmentsState = mutableStateOf(emptyList<InvestmentEntity>())
     val investmentsState: State<List<InvestmentEntity>> = _investmentsState
 
-    private val _calculatedBitcoinAmount = mutableDoubleStateOf(0.0)
-    val calculatedBitcoinAmount: State<Double> = _calculatedBitcoinAmount
+    private val _calculatedDollarAmount = mutableDoubleStateOf(0.0)
+    val calculatedDollarAmount: State<Double> = _calculatedDollarAmount
 
     //Toastmessage State
     private val _toastMessageState = MutableStateFlow<String?>(null)
@@ -89,20 +91,20 @@ class BuyViewModel(
     }
 
     //Berechnet den anteil an Coins bei einenm Investment
-    fun calculateBitcoinAmount(dollarAmount: Double) {
+    fun calculateBitcoinValue(coinAmount: Double) {
         val currentBitcoinPrice = _state.value.coin.price
         if (currentBitcoinPrice > 0) {
-            _calculatedBitcoinAmount.doubleValue = dollarAmount / currentBitcoinPrice
+            _calculatedDollarAmount.doubleValue = coinAmount * currentBitcoinPrice
         }
     }
 
-    fun addInvestment(investmentAmountInDollars: Double, purchaseType: PurchaseType) {
+    fun processSellOrder(sellingAmountInCoins: Double, purchaseType: PurchaseType) {
         viewModelScope.launch {
             try {
-                // Validation ob genügend cash vorhanden ist
+                // Validation ob genügend Coins vorhanden sind
                 val portfolio = portfolioState.value
-                if (portfolio.totalCash < investmentAmountInDollars) {
-                    setToastMessage(message = "Not enough cash to make this investment!")
+                if (portfolio.totalAmount < sellingAmountInCoins) {
+                    setToastMessage(message = "Not enough Coins to sell!")
                     return@launch
                 }
                 // Fetch Coin data
@@ -113,21 +115,26 @@ class BuyViewModel(
                 val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
 
                 // Berechnet die Menge an Bitcoins
-                val bitcoinAmount = investmentAmountInDollars / updatedCoin.price
+                val dollarAmount = sellingAmountInCoins * updatedCoin.price
 
                 // Investition hinzufügen
                 addInvestmentUseCase(
                     coin = updatedCoin,
-                    quantity = bitcoinAmount,
+                    quantity = sellingAmountInCoins,
                     purchasePrice = updatedCoin.price,
                     purchaseType = purchaseType,
                 )
-                setToastMessage("Investment added successfully!")
-                // Aktualisiert das Portfolio
+
+                // Update portfolio totalCash and totalInvestment
+                val newTotalCash = portfolio.totalCash + dollarAmount
+                val newTotalInvestment = portfolio.totalInvestment - sellingAmountInCoins
+
+                // Update portfolio
                 refreshPortfolio(forceRefresh = true)
+                setToastMessage("Sell order processed successfully!")
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(
-                    error = "Failed to add investment: ${e.message}"
+                    error = "Failed to sell investment: ${e.message}"
                 )
             }
         }
@@ -181,7 +188,7 @@ class BuyViewModel(
                 // Daten aus Room laden
                 val localCoin = getCoinUseCase.getCoinFromDatabase()
                 if (localCoin != null) {
-                    Log.d("BuyViewModel", "Loaded from Room: $localCoin")
+                    Log.d("SellViewModel", "Loaded from Room: $localCoin")
                     _state.value = CoinState(coin = localCoin.toDomainModel())
                 }
 
@@ -206,7 +213,7 @@ class BuyViewModel(
                     }
                 }.launchIn(viewModelScope)
             } catch (e: Exception) {
-                Log.e("BuyViewModel", "Error: ${e.message}")
+                Log.e("SellViewModel", "Error: ${e.message}")
                 _state.value = CoinState(error = "Error: ${e.message}")
             }
         }

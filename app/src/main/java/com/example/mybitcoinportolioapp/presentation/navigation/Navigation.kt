@@ -21,8 +21,8 @@ fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) 
     ) {
         composable("home") { HomeScreen(navController = navController) }
         composable("buy") { BuyScreen() }
-        composable("sell") { TestHomescreen() }
-        composable("settings") { SettingsScreen() }
+        composable("sell") { SellScreen() }
+        composable("settings") { TestHomescreen() }
     }
 
 }
