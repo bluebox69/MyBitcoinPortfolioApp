@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -78,12 +79,12 @@ fun BuyScreen(
     //Refresh Rotation
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     var rotationTrigger by remember { mutableStateOf(false) }
-    var totalRotation by remember { mutableStateOf(0f) }
+    var totalRotation by remember { mutableFloatStateOf(0f) }
 
     // Rotation animation
     val rotationAngle by animateFloatAsState(
         targetValue = totalRotation,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 600, easing = LinearEasing),
         finishedListener = { rotationTrigger = false }
     )
 
@@ -146,7 +147,7 @@ fun BuyScreen(
                     onClick = {
                         totalRotation += 360f
                         rotationTrigger = true
-                        viewModel.refreshPortfolio()
+                        viewModel.refreshPortfolio(forceRefresh = true)
                               },
                     enabled = !isRefreshing
                 ) {

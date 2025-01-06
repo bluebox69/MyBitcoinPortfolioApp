@@ -83,7 +83,7 @@ fun HomeScreen(
     // Rotation animation
     val rotationAngle by animateFloatAsState(
         targetValue = totalRotation,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 600, easing = LinearEasing),
         finishedListener = { rotationTrigger = false }
     )
 
@@ -137,7 +137,7 @@ fun HomeScreen(
                 IconButton(onClick = {
                     totalRotation += 360f
                     rotationTrigger = true
-                    viewModel.refreshPortfolio()
+                    viewModel.refreshPortfolio(forceRefresh = true)
                 }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),

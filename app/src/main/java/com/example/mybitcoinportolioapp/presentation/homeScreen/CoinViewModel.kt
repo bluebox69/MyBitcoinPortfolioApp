@@ -51,6 +51,8 @@ class CoinViewModel (
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
+    private var cachedPortfolio: PortfolioState? = null
+
     init {
         loadCoinFromDatabase()
         getCoin()
@@ -140,9 +142,15 @@ class CoinViewModel (
     }
 
     //refresh Portfolio
-    fun refreshPortfolio() {
+    fun refreshPortfolio(forceRefresh: Boolean = false) {
         viewModelScope.launch {
+            _isRefreshing.value = true
             try {
+                // Check if a refresh is necessary
+                if (cachedPortfolio != null && !forceRefresh) {
+                    _portfolioState.value = cachedPortfolio!!
+                    return@launch
+                }
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 // Fetch the latest coin data
                 val latestCoin = getCoinsUseCase.invoke().firstOrNull { result ->

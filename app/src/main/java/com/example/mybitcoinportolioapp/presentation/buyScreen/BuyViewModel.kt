@@ -50,6 +50,8 @@ class BuyViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
+    private var cachedPortfolio: PortfolioState? = null
+
     init {
         initializePortfolio()
         getCoin()
@@ -122,7 +124,7 @@ class BuyViewModel(
                 )
                 setToastMessage("Investment added successfully!")
                 // Aktualisiert das Portfolio
-                refreshPortfolio()
+                refreshPortfolio(forceRefresh = true)
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(
                     error = "Failed to add investment: ${e.message}"
@@ -131,10 +133,15 @@ class BuyViewModel(
         }
     }
     //refresh Portfolio
-    fun refreshPortfolio() {
+    fun refreshPortfolio(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
+                if (cachedPortfolio != null && !forceRefresh) {
+                    _portfolioState.value = cachedPortfolio!!
+                    return@launch
+                }
+
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 // Fetch the latest coin data
                 val latestCoin = getCoinUseCase.invoke().firstOrNull { result ->
