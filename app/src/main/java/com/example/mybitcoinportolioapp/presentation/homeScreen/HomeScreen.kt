@@ -76,7 +76,6 @@ fun HomeScreen(
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     //Refresh Rotation
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
     var rotationTrigger by remember { mutableStateOf(false) }
     var totalRotation by remember { mutableStateOf(0f) }
 

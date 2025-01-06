@@ -60,7 +60,6 @@ fun BuyScreen(
 ) {
     val coinState = viewModel.state.value
     val portfolioState = viewModel.portfolioState.value
-    val investmentState = viewModel.investmentsState.value
     val calculatedBitcoinAmount = viewModel.calculatedBitcoinAmount.value
 
     val scrollState = rememberScrollState()

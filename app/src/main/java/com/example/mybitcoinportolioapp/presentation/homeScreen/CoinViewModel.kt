@@ -28,8 +28,6 @@ class CoinViewModel (
     private val getCoinsUseCase: GetCoinUseCase,
     private val initializePortfolioUseCase: InitializePortfolioUseCase,
     private val getInvestmentsUseCase: GetInvestmentsUseCase,
-    private val addInvestmentUseCase: AddInvestmentUseCase,
-    private val updatePortfolioUseCase: UpdatePortfolioUseCase,
     private val resetPortfolioUseCase: ResetPortfolioUseCase
 
     ) : ViewModel() {
@@ -178,41 +176,6 @@ class CoinViewModel (
             }
         }
 
-    }
-
-    // Update Portfolio (if needed)
-    fun updatePortfolio(
-        totalCash: Double,
-        totalInvestment: Double,
-        lastUpdated: Long,
-        coinName: String,
-        coinSymbol: String,
-        totalAmount: Double
-    ) {
-        viewModelScope.launch {
-            try {
-                updatePortfolioUseCase(
-                    totalCash,
-                    totalInvestment,
-                    lastUpdated,
-                    coinName,
-                    coinSymbol,
-                    totalAmount
-                    )
-                _portfolioState.value = PortfolioState(
-                    totalCash = totalCash,
-                    totalInvestment = totalInvestment,
-                    lastUpdated = System.currentTimeMillis(),
-                    coinName = coinName,
-                    coinSymbol = coinSymbol,
-                    totalAmount = totalAmount
-                )
-            } catch (e: Exception) {
-                _portfolioState.value = PortfolioState(
-                    error = "Failed to update portfolio: ${e.message}"
-                )
-            }
-        }
     }
 
     // Reset Portfolio

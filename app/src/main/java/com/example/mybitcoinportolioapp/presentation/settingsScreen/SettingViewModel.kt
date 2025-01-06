@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class SettingViewModel(
-    private val getCoinUseCase: GetCoinUseCase,
     private val resetPortfolioUseCase: ResetPortfolioUseCase,
     private val updatePortfolioUseCase: UpdatePortfolioUseCase,
     private val initializePortfolioUseCase: InitializePortfolioUseCase,
@@ -39,21 +38,10 @@ class SettingViewModel(
     private val _portfolioState = mutableStateOf(PortfolioState())
     val portfolioState: State<PortfolioState> = _portfolioState
 
-    private val _investmentsState = mutableStateOf(emptyList<InvestmentEntity>())
-    val investmentsState: State<List<InvestmentEntity>> = _investmentsState
-
-    private val _calculatedDollarAmount = mutableDoubleStateOf(0.0)
-    val calculatedDollarAmount: State<Double> = _calculatedDollarAmount
 
     //Toastmessage State
     private val _toastMessageState = MutableStateFlow<String?>(null)
     val toastMessage = _toastMessageState.asStateFlow()
-
-    //refresh
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
-
-    private var cachedPortfolio: PortfolioState? = null
 
     init {
         initializePortfolio()

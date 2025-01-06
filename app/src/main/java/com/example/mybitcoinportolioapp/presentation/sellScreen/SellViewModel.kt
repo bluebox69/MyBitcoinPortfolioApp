@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
 class SellViewModel(
     private val getCoinUseCase: GetCoinUseCase,
     private val addInvestmentUseCase: AddInvestmentUseCase,
-    private val updatePortfolioUseCase: UpdatePortfolioUseCase,
     private val initializePortfolioUseCase: InitializePortfolioUseCase,
 
     ) : ViewModel() {
