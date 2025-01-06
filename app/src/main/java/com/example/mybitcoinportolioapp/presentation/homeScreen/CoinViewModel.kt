@@ -55,8 +55,8 @@ class CoinViewModel (
 
     init {
         loadCoinFromDatabase()
-        getCoin()
         initializePortfolio()
+        refreshPortfolio(forceRefresh = false)
         loadInvestments()
     }
 

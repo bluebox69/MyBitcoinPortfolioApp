@@ -144,7 +144,10 @@ fun HomeScreen(
                         contentDescription = "Refresh Coin Data",
                         modifier = Modifier
                             .size(34.dp)
-                            .graphicsLayer(rotationZ = rotationAngle),
+                            .graphicsLayer(
+                                rotationZ = rotationAngle,
+                                scaleX = -1f
+                            ),
                         tint = Color.Black
                     )
                 }

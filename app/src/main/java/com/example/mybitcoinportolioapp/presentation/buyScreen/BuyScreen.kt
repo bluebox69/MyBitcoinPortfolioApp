@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +54,7 @@ import com.example.mybitcoinportolioapp.presentation.ui.theme.LightYellow
 import org.koin.androidx.compose.koinViewModel
 import java.text.DecimalFormat
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import com.example.mybitcoinportolioapp.common.showToast
 
 
@@ -156,7 +158,10 @@ fun BuyScreen(
                         contentDescription = "Refresh Coin Data",
                         modifier = Modifier
                             .size(34.dp)
-                            .graphicsLayer(rotationZ = rotationAngle),
+                            .graphicsLayer(
+                                rotationZ = rotationAngle,
+                                scaleX = -1f
+                            ),
                         tint = if (isRefreshing) Color.Gray else Color.Black
                     )
                 }
