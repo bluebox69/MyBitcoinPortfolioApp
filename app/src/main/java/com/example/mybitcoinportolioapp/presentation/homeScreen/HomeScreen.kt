@@ -1,6 +1,9 @@
 package com.example.mybitcoinportolioapp.presentation.homeScreen
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,18 +16,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,9 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mybitcoinportolioapp.R
+import com.example.mybitcoinportolioapp.common.showToast
 import com.example.mybitcoinportolioapp.common.toReadableDate
 import com.example.mybitcoinportolioapp.data.local.entities.purchaseType.PurchaseType
-import com.example.mybitcoinportolioapp.presentation.homeScreen.component.CustomButton
+import com.example.mybitcoinportolioapp.presentation.global_components.CustomButton
 import com.example.mybitcoinportolioapp.presentation.homeScreen.component.InvestmentCard
 import com.example.mybitcoinportolioapp.presentation.ui.theme.FontFamilies
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightBlack
@@ -60,6 +70,29 @@ fun HomeScreen(
 
     val decimalFormat = DecimalFormat("#,##0.00")
     val lastUpdate = portfolioState.lastUpdated
+
+    //Toast Message
+    val context = LocalContext.current
+    val toastMessage by viewModel.toastMessage.collectAsState()
+
+    //Refresh Rotation
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    var rotationTrigger by remember { mutableStateOf(false) }
+    var totalRotation by remember { mutableStateOf(0f) }
+
+    // Rotation animation
+    val rotationAngle by animateFloatAsState(
+        targetValue = totalRotation,
+        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+        finishedListener = { rotationTrigger = false }
+    )
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            showToast(context, it)
+            viewModel.clearToastMessage()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -101,11 +134,17 @@ fun HomeScreen(
                     fontWeight = FontWeight.Normal,
                     color = Color.Black
                 )
-                IconButton(onClick = { viewModel.refreshPortfolio() }) {
+                IconButton(onClick = {
+                    totalRotation += 360f
+                    rotationTrigger = true
+                    viewModel.refreshPortfolio()
+                }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),
                         contentDescription = "Refresh Coin Data",
-                        modifier = Modifier.size(34.dp),
+                        modifier = Modifier
+                            .size(34.dp)
+                            .graphicsLayer(rotationZ = rotationAngle),
                         tint = Color.Black
                     )
                 }

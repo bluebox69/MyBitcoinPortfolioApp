@@ -16,6 +16,8 @@ import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestment
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -41,8 +43,12 @@ class BuyViewModel(
     val calculatedBitcoinAmount: State<Double> = _calculatedBitcoinAmount
 
     //Toastmessage State
-    private val _toastMessageState = mutableStateOf("")
-    val toastMessageState: State<String> = _toastMessageState
+    private val _toastMessageState = MutableStateFlow<String?>(null)
+    val toastMessage = _toastMessageState.asStateFlow()
+
+    //refresh
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
 
     init {
         initializePortfolio()
@@ -73,8 +79,11 @@ class BuyViewModel(
         }
     }
 
+    private fun setToastMessage(message: String) {
+        _toastMessageState.value = message
+    }
     fun clearToastMessage() {
-        _toastMessageState.value = ""
+        _toastMessageState.value = null
     }
 
     //Berechnet den anteil an Coins bei einenm Investment
@@ -91,7 +100,7 @@ class BuyViewModel(
                 // Validation ob genügend cash vorhanden ist
                 val portfolio = portfolioState.value
                 if (portfolio.totalCash < investmentAmountInDollars) {
-                    _toastMessageState.value = "Not enough cash to make this investment."
+                    setToastMessage(message = "Not enough cash to make this investment!")
                     return@launch
                 }
                 // Fetch Coin data
@@ -111,7 +120,7 @@ class BuyViewModel(
                     purchasePrice = updatedCoin.price,
                     purchaseType = purchaseType,
                 )
-                _toastMessageState.value = "Investment added successfully!"
+                setToastMessage("Investment added successfully!")
                 // Aktualisiert das Portfolio
                 refreshPortfolio()
             } catch (e: Exception) {
@@ -124,6 +133,7 @@ class BuyViewModel(
     //refresh Portfolio
     fun refreshPortfolio() {
         viewModelScope.launch {
+            _isRefreshing.value = true
             try {
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 // Fetch the latest coin data
@@ -149,6 +159,8 @@ class BuyViewModel(
                 _portfolioState.value = PortfolioState(
                     error = "Failed to refresh Portfolio: ${e.message}"
                 )
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.example.mybitcoinportolioapp.presentation.buyScreen
 
 import android.util.Log
-import android.widget.Toast
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +23,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorProperty
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,16 +45,16 @@ import androidx.compose.ui.unit.sp
 import com.example.mybitcoinportolioapp.R
 import com.example.mybitcoinportolioapp.common.toReadableDate
 import com.example.mybitcoinportolioapp.data.local.entities.purchaseType.PurchaseType
-import com.example.mybitcoinportolioapp.presentation.homeScreen.component.CustomButton
+import com.example.mybitcoinportolioapp.presentation.global_components.CustomButton
 import com.example.mybitcoinportolioapp.presentation.ui.theme.FontFamilies
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightWhite
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightYellow
 import org.koin.androidx.compose.koinViewModel
 import java.text.DecimalFormat
 import androidx.compose.ui.platform.LocalContext
+import com.example.mybitcoinportolioapp.common.showToast
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuyScreen(
     viewModel: BuyViewModel = koinViewModel()
@@ -66,11 +71,27 @@ fun BuyScreen(
 
     var investAmount by remember { mutableStateOf("") }
 
+    //Toast Message
     val context = LocalContext.current
-    val toastMessage = viewModel.toastMessageState.value
-    if (toastMessage.isNotEmpty()) {
-        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
-        viewModel.clearToastMessage()
+    val toastMessage by viewModel.toastMessage.collectAsState()
+
+    //Refresh Rotation
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    var rotationTrigger by remember { mutableStateOf(false) }
+    var totalRotation by remember { mutableStateOf(0f) }
+
+    // Rotation animation
+    val rotationAngle by animateFloatAsState(
+        targetValue = totalRotation,
+        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+        finishedListener = { rotationTrigger = false }
+    )
+
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            showToast(context, it)
+            viewModel.clearToastMessage()
+        }
     }
 
 
@@ -121,12 +142,21 @@ fun BuyScreen(
                     fontWeight = FontWeight.Normal,
                     color = Color.Black
                 )
-                IconButton(onClick = { viewModel.refreshPortfolio() }) {
+                IconButton(
+                    onClick = {
+                        totalRotation += 360f
+                        rotationTrigger = true
+                        viewModel.refreshPortfolio()
+                              },
+                    enabled = !isRefreshing
+                ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),
                         contentDescription = "Refresh Coin Data",
-                        modifier = Modifier.size(34.dp),
-                        tint = Color.Black
+                        modifier = Modifier
+                            .size(34.dp)
+                            .graphicsLayer(rotationZ = rotationAngle),
+                        tint = if (isRefreshing) Color.Gray else Color.Black
                     )
                 }
             }

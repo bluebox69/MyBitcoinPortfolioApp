@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mybitcoinportolioapp.common.Resource
 import com.example.mybitcoinportolioapp.data.local.entities.InvestmentEntity
-import com.example.mybitcoinportolioapp.data.local.entities.purchaseType.PurchaseType
 import com.example.mybitcoinportolioapp.data.local.entities.toDomainModel
 import com.example.mybitcoinportolioapp.domain.model.Coin
 import com.example.mybitcoinportolioapp.domain.use_case.getCoin.GetCoinUseCase
@@ -18,6 +17,8 @@ import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolio
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -42,6 +43,14 @@ class CoinViewModel (
     private val _investmentsState = mutableStateOf(emptyList<InvestmentEntity>())
     val investmentsState: State<List<InvestmentEntity>> = _investmentsState
 
+    //Toastmessage State
+    private val _toastMessageState = MutableStateFlow<String?>(null)
+    val toastMessage = _toastMessageState.asStateFlow()
+
+    //refresh
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     init {
         loadCoinFromDatabase()
         getCoin()
@@ -49,6 +58,12 @@ class CoinViewModel (
         loadInvestments()
     }
 
+    private fun setToastMessage(message: String) {
+        _toastMessageState.value = message
+    }
+    fun clearToastMessage() {
+        _toastMessageState.value = null
+    }
     // Room-Daten laden
     private fun loadCoinFromDatabase() {
         viewModelScope.launch {
@@ -77,6 +92,7 @@ class CoinViewModel (
                     )
                 }
             } catch (e: Exception) {
+                setToastMessage("Something went wrong!")
                 _portfolioState.value = PortfolioState(
                     error = "Failed to initialize portfolio: ${e.message}"
                 )
@@ -99,6 +115,7 @@ class CoinViewModel (
                 val investments = getInvestmentsUseCase()
                 _investmentsState.value = investments
             } catch (e: Exception) {
+                setToastMessage("Cannot load Investments from Database")
                 Log.e("ViewModel", "Cant load Investments")
             }
         }
@@ -245,6 +262,7 @@ class CoinViewModel (
                     }
                 }.launchIn(viewModelScope)
             } catch (e: Exception) {
+                setToastMessage("API Call Failed, Check Internet Connection")
                 Log.e("CoinViewModel", "Error: ${e.message}")
                 _state.value = CoinState(error = "Error: ${e.message}")
             }
