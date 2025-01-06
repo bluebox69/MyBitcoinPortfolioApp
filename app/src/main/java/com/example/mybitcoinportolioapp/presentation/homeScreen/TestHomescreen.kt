@@ -18,7 +18,7 @@ import org.koin.androidx.compose.koinViewModel
 @SuppressLint("DefaultLocale")
 @Composable
 fun TestHomescreen(
-    viewModel: CoinViewModel = koinViewModel() // get ViewModel
+    viewModel: CoinViewModel = koinViewModel()// get ViewModel
 ) {
     val scrollState = rememberScrollState()
     val coinState = viewModel.state.value
@@ -68,12 +68,15 @@ fun TestHomescreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        /*
         Button(onClick = { viewModel.addInvestment(coinState.coin, 0.1, coinState.coin.price, PurchaseType.BUY) }) {
             Text(text = "Add Investment")
         }
         Button(onClick = { viewModel.addInvestment(coinState.coin, 0.1, coinState.coin.price, PurchaseType.SELL) }) {
             Text(text = "Sell Investment")
         }
+
+         */
         Button(onClick = { viewModel.resetPortfolio() }) {
             Text(text = "Reset Portfolio")
         }

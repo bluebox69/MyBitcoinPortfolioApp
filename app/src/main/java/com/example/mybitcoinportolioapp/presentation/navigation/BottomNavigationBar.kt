@@ -1,6 +1,9 @@
 package com.example.mybitcoinportolioapp.presentation.navigation
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -26,7 +29,8 @@ fun BottomNavigationBar(
 ) {
     val backstackEntry = navController.currentBackStackEntryAsState()
     BottomNavigation(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxHeight(0.1f),
         backgroundColor = Color.Black,
         elevation = 5.dp
     ) {

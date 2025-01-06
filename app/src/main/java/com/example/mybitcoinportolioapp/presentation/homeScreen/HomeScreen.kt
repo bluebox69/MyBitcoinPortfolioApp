@@ -1,7 +1,9 @@
 package com.example.mybitcoinportolioapp.presentation.homeScreen
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +39,7 @@ import com.example.mybitcoinportolioapp.presentation.homeScreen.component.Invest
 import com.example.mybitcoinportolioapp.presentation.ui.theme.FontFamilies
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightBlack
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightRed
+import com.example.mybitcoinportolioapp.presentation.ui.theme.LightWhite
 import com.example.mybitcoinportolioapp.presentation.ui.theme.LightYellow
 import com.example.mybitcoinportolioapp.presentation.ui.theme.MyGreen
 import com.example.mybitcoinportolioapp.presentation.ui.theme.MyRed
@@ -58,196 +61,206 @@ fun HomeScreen(
     val decimalFormat = DecimalFormat("#,##0.00")
     val lastUpdate = portfolioState.lastUpdated
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(LightWhite)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                text = "Last Update: ${lastUpdate.toReadableDate()}",
-                fontSize = 14.sp,
-                fontFamily = FontFamilies.fontFamily1,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Total Amount",
-                fontSize = 32.sp,
-                fontFamily = FontFamilies.fontFamily1,
-                fontWeight = FontWeight.Normal,
-                color = Color.Black
-            )
-            IconButton(onClick = { viewModel.refreshPortfolio() }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),
-                    contentDescription = "Refresh Coin Data",
-                    modifier = Modifier.size(34.dp),
-                    tint = Color.Black
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         Column(
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "$${decimalFormat.format(portfolioState.currentPortfolioValue + portfolioState.totalCash)}",
-                fontSize = 45.sp,
-                fontFamily = FontFamilies.fontFamily1,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = "Last Update: ${lastUpdate.toReadableDate()}",
+                    fontSize = 14.sp,
+                    fontFamily = FontFamilies.fontFamily1,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Gray
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "$${decimalFormat.format(portfolioState.profitOrLoss)}",
-                    fontSize = 18.sp,
+                    text = "Total Amount",
+                    fontSize = 32.sp,
                     fontFamily = FontFamilies.fontFamily1,
-                    fontWeight = FontWeight.Light,
-                    color = if (portfolioState.profitOrLoss < 0) {
-                        MyRed
-                    } else {
-                        LightBlack
-                    }
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Black
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                portfolioState.performancePercentage?.let { performance ->
-                    Text(
-                        text = if (performance >= 0) "+${decimalFormat.format(performance)}%" else "${decimalFormat.format(performance)}%",
-                        fontSize = 18.sp,
-                        fontFamily = FontFamilies.fontFamily1,
-                        fontWeight = FontWeight.Light,
-                        color = if (performance > 0) {
-                            MyGreen
-                        } else if (performance < 0) {
-                            MyRed
-                        } else {
-                            Color.Black
-                        }
+                IconButton(onClick = { viewModel.refreshPortfolio() }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.arrow_refresh),
+                        contentDescription = "Refresh Coin Data",
+                        modifier = Modifier.size(34.dp),
+                        tint = Color.Black
                     )
                 }
             }
-        }
-        //Investment
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "$${decimalFormat.format(portfolioState.currentPortfolioValue + portfolioState.totalCash)}",
+                    fontSize = 45.sp,
+                    fontFamily = FontFamilies.fontFamily1,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "$${decimalFormat.format(portfolioState.profitOrLoss)}",
+                        fontSize = 18.sp,
+                        fontFamily = FontFamilies.fontFamily1,
+                        fontWeight = FontWeight.Light,
+                        color = if (portfolioState.profitOrLoss < 0) {
+                            MyRed
+                        } else {
+                            LightBlack
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    portfolioState.performancePercentage?.let { performance ->
+                        Text(
+                            text = if (performance >= 0) "+${decimalFormat.format(performance)}%" else "${
+                                decimalFormat.format(
+                                    performance
+                                )
+                            }%",
+                            fontSize = 18.sp,
+                            fontFamily = FontFamilies.fontFamily1,
+                            fontWeight = FontWeight.Light,
+                            color = if (performance > 0) {
+                                MyGreen
+                            } else if (performance < 0) {
+                                MyRed
+                            } else {
+                                Color.Black
+                            }
+                        )
+                    }
+                }
+            }
+            //Investment
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Investments",
+                    fontSize = 20.sp,
+                    fontFamily = FontFamilies.fontFamily2,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Cash: $${decimalFormat.format(portfolioState.totalCash)}",
+                    fontSize = 20.sp,
+                    fontFamily = FontFamilies.fontFamily1,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            InvestmentCard(
+                painter = painterResource(id = R.drawable.bitcoin_logo),
+                coinName = portfolioState.coinName,
+                coinSymbol = portfolioState.coinSymbol,
+                coinAmount = portfolioState.totalAmount,
+                iconColor = LightRed,
+                iconSize = 28,
+                coinMetaInfo = portfolioState.coinSymbol,
+                coinValue = portfolioState.totalInvestment
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                //horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CustomButton(
+                    buttonText = "Buy",
+                    buttonColor = LightYellow,
+                    painter = painterResource(id = R.drawable.icon_buy),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    buttonOnClick = {
+                        navController.navigate("buy")
+                    }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                CustomButton(
+                    buttonText = "Sell",
+                    buttonColor = LightRed,
+                    painter = painterResource(id = R.drawable.icon_sell),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    buttonOnClick = {
+                        navController.navigate("sell")
+                    }
+                )
+            }
+            //Transactions
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
-                text = "Investments",
+                text = "Transactions",
                 fontSize = 20.sp,
                 fontFamily = FontFamilies.fontFamily2,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Cash: $${decimalFormat.format(portfolioState.totalCash)}",
-                fontSize = 20.sp,
-                fontFamily = FontFamilies.fontFamily1,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Black
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        InvestmentCard(
-            painter = painterResource(id = R.drawable.bitcoin_logo),
-            coinName = portfolioState.coinName,
-            coinSymbol = portfolioState.coinSymbol,
-            coinAmount = portfolioState.totalAmount,
-            iconColor = LightRed,
-            iconSize = 28,
-            coinMetaInfo = portfolioState.coinSymbol,
-            coinValue = portfolioState.totalInvestment
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            //horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
-        ){
-            CustomButton(
-                buttonText = "Buy",
-                buttonColor = LightYellow,
-                painter = painterResource(id = R.drawable.icon_buy),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                buttonOnClick = {
-                    navController.navigate("buy")
+            Spacer(modifier = Modifier.height(8.dp))
+            // Investments List
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                investments.forEach {
+                    InvestmentCard(
+                        painter = painterResource(
+                            id = if (it.purchaseType == PurchaseType.BUY) R.drawable.icon_buy
+                            else R.drawable.icon_sell
+                        ),
+                        iconColor = if (it.purchaseType == PurchaseType.BUY) LightYellow else LightRed,
+                        coinName = it.coinName,
+                        coinSymbol = it.coinSymbol,
+                        coinMetaInfo = it.date.toReadableDate(),
+                        coinAmount = it.quantity,
+                        coinValue = it.investmentCost,
+                        iconSize = 38,
+                        modifier = Modifier
+                    )
                 }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            CustomButton(
-                buttonText = "Sell",
-                buttonColor = LightRed,
-                painter = painterResource(id = R.drawable.icon_sell),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                buttonOnClick = {
-                    navController.navigate("sell")
-                }
-            )
-
-        }
-        //Transactions
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Transactions",
-            fontSize = 20.sp,
-            fontFamily = FontFamilies.fontFamily2,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-        // Investments List
-        Column (
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            investments.forEach {
-                InvestmentCard(
-                    painter = painterResource(
-                        id = if (it.purchaseType == PurchaseType.BUY) R.drawable.icon_buy
-                        else R.drawable.icon_sell
-                    ),
-                    iconColor = if (it.purchaseType == PurchaseType.BUY) LightYellow else LightRed,
-                    coinName = it.coinName,
-                    coinSymbol = it.coinSymbol,
-                    coinMetaInfo = it.date.toReadableDate(),
-                    coinAmount = it.quantity,
-                    coinValue = it.investmentCost,
-                    iconSize = 38,
-                    modifier = Modifier
-                )
             }
         }
     }

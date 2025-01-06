@@ -36,6 +36,7 @@ fun InvestmentCard(
     modifier: Modifier = Modifier
 ) {
     val decimalFormat = DecimalFormat("#,##0.00")
+    val decimalFormat2 = DecimalFormat("#,##0.0000")
 
     Card(
         modifier = modifier
@@ -111,7 +112,7 @@ fun InvestmentCard(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "${decimalFormat.format(coinAmount)} $coinSymbol",
+                        text = "${decimalFormat2.format(coinAmount)} $coinSymbol",
                         color = LightGrey,
                         fontSize = 18.sp,
                         fontFamily = FontFamilies.fontFamily1,

@@ -1,7 +1,8 @@
-package com.example.mybitcoinportolioapp.presentation.homeScreen
+package com.example.mybitcoinportolioapp.presentation.buyScreen
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,10 +13,7 @@ import com.example.mybitcoinportolioapp.data.local.entities.toDomainModel
 import com.example.mybitcoinportolioapp.domain.model.Coin
 import com.example.mybitcoinportolioapp.domain.use_case.getCoin.GetCoinUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
-import com.example.mybitcoinportolioapp.domain.use_case.investment.GetInvestmentsUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
-import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolioUseCase
-import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
 import kotlinx.coroutines.flow.firstOrNull
@@ -23,13 +21,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class CoinViewModel (
-    private val getCoinsUseCase: GetCoinUseCase,
-    private val initializePortfolioUseCase: InitializePortfolioUseCase,
-    private val getInvestmentsUseCase: GetInvestmentsUseCase,
+class BuyViewModel(
+    private val getCoinUseCase: GetCoinUseCase,
     private val addInvestmentUseCase: AddInvestmentUseCase,
-    private val updatePortfolioUseCase: UpdatePortfolioUseCase,
-    private val resetPortfolioUseCase: ResetPortfolioUseCase
+    private val initializePortfolioUseCase: InitializePortfolioUseCase,
 
     ) : ViewModel() {
 
@@ -42,22 +37,18 @@ class CoinViewModel (
     private val _investmentsState = mutableStateOf(emptyList<InvestmentEntity>())
     val investmentsState: State<List<InvestmentEntity>> = _investmentsState
 
+    private val _calculatedBitcoinAmount = mutableDoubleStateOf(0.0)
+    val calculatedBitcoinAmount: State<Double> = _calculatedBitcoinAmount
+
+    //Toastmessage State
+    private val _toastMessageState = mutableStateOf("")
+    val toastMessageState: State<String> = _toastMessageState
+
     init {
-        loadCoinFromDatabase()
-        getCoin()
         initializePortfolio()
-        loadInvestments()
+        getCoin()
     }
 
-    // Room-Daten laden
-    private fun loadCoinFromDatabase() {
-        viewModelScope.launch {
-            val localCoin = getCoinsUseCase.getCoinFromDatabase()
-            if (localCoin != null) {
-                _state.value = CoinState(coin = localCoin.toDomainModel())
-            }
-        }
-    }
     // Initialize Portfolio
     private fun initializePortfolio() {
         viewModelScope.launch {
@@ -65,15 +56,13 @@ class CoinViewModel (
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 val portfolio = initializePortfolioUseCase()
                 portfolio?.let {
-                    val performance = calculatePerformance(it.totalInvestment, it.totalAmount)
                     _portfolioState.value = PortfolioState(
                         coinName = it.coinName,
                         coinSymbol = it.coinSymbol,
                         totalCash = it.totalCash,
                         totalInvestment = it.totalInvestment,
                         lastUpdated = System.currentTimeMillis(),
-                        totalAmount = it.totalAmount,
-                        performancePercentage = performance
+                        totalAmount = it.totalAmount
                     )
                 }
             } catch (e: Exception) {
@@ -84,51 +73,61 @@ class CoinViewModel (
         }
     }
 
-    private fun calculatePerformance(totalInvestment: Double, totalAmount: Double): Double {
-        return if (totalInvestment != 0.0) {
-            ((totalAmount - totalInvestment) / totalInvestment) * 100
-        } else {
-            0.0
+    fun clearToastMessage() {
+        _toastMessageState.value = ""
+    }
+
+    //Berechnet den anteil an Coins bei einenm Investment
+    fun calculateBitcoinAmount(dollarAmount: Double) {
+        val currentBitcoinPrice = _state.value.coin.price
+        if (currentBitcoinPrice > 0) {
+            _calculatedBitcoinAmount.doubleValue = dollarAmount / currentBitcoinPrice
         }
     }
 
-    // Load Investments
-    private fun loadInvestments() {
+    fun addInvestment(investmentAmountInDollars: Double, purchaseType: PurchaseType) {
         viewModelScope.launch {
             try {
-                val investments = getInvestmentsUseCase()
-                _investmentsState.value = investments
+                // Validation ob genügend cash vorhanden ist
+                val portfolio = portfolioState.value
+                if (portfolio.totalCash < investmentAmountInDollars) {
+                    _toastMessageState.value = "Not enough cash to make this investment."
+                    return@launch
+                }
+                // Fetch Coin data
+                val latestCoin = getCoinUseCase.invoke().firstOrNull { result ->
+                    result is Resource.Success
+                } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
+
+                val updatedCoin = latestCoin.data ?: throw Exception("Coin data is null")
+
+                // Berechnet die Menge an Bitcoins
+                val bitcoinAmount = investmentAmountInDollars / updatedCoin.price
+
+                // Investition hinzufügen
+                addInvestmentUseCase(
+                    coin = updatedCoin,
+                    quantity = bitcoinAmount,
+                    purchasePrice = updatedCoin.price,
+                    purchaseType = purchaseType,
+                )
+                _toastMessageState.value = "Investment added successfully!"
+                // Aktualisiert das Portfolio
+                refreshPortfolio()
             } catch (e: Exception) {
-                Log.e("ViewModel", "Cant load Investments")
+                _portfolioState.value = PortfolioState(
+                    error = "Failed to add investment: ${e.message}"
+                )
             }
         }
     }
-    //Performance calculation
-    private fun calculatePortfolioPerformance(currentBitcoinPrice: Double) {
-        val portfolio = _portfolioState.value
-
-        val totalValueNow = portfolio.totalAmount * currentBitcoinPrice
-        val profitOrLoss = totalValueNow - portfolio.totalInvestment
-        val percentageChange = if (portfolio.totalInvestment != 0.0) {
-            (profitOrLoss / portfolio.totalInvestment) * 100
-        } else {
-            0.0
-        }
-
-        _portfolioState.value = portfolio.copy(
-            currentPortfolioValue = totalValueNow,
-            profitOrLoss = profitOrLoss,
-            performancePercentage = percentageChange
-        )
-    }
-
     //refresh Portfolio
     fun refreshPortfolio() {
         viewModelScope.launch {
             try {
                 _portfolioState.value = _portfolioState.value.copy(isLoading = true)
                 // Fetch the latest coin data
-                val latestCoin = getCoinsUseCase.invoke().firstOrNull { result ->
+                val latestCoin = getCoinUseCase.invoke().firstOrNull { result ->
                     result is Resource.Success
                 } as? Resource.Success<Coin> ?: throw Exception("Failed to fetch latest coin data")
 
@@ -145,73 +144,14 @@ class CoinViewModel (
                         coinSymbol = it.coinSymbol
                     )
                 }
-                calculatePortfolioPerformance(updatedCoin.price)
+                getCoin()
             } catch (e: Exception) {
                 _portfolioState.value = PortfolioState(
                     error = "Failed to refresh Portfolio: ${e.message}"
                 )
             }
         }
-
     }
-
-    // Update Portfolio (if needed)
-    fun updatePortfolio(
-        totalCash: Double,
-        totalInvestment: Double,
-        lastUpdated: Long,
-        coinName: String,
-        coinSymbol: String,
-        totalAmount: Double
-    ) {
-        viewModelScope.launch {
-            try {
-                updatePortfolioUseCase(
-                    totalCash,
-                    totalInvestment,
-                    lastUpdated,
-                    coinName,
-                    coinSymbol,
-                    totalAmount
-                    )
-                _portfolioState.value = PortfolioState(
-                    totalCash = totalCash,
-                    totalInvestment = totalInvestment,
-                    lastUpdated = System.currentTimeMillis(),
-                    coinName = coinName,
-                    coinSymbol = coinSymbol,
-                    totalAmount = totalAmount
-                )
-            } catch (e: Exception) {
-                _portfolioState.value = PortfolioState(
-                    error = "Failed to update portfolio: ${e.message}"
-                )
-            }
-        }
-    }
-
-    // Reset Portfolio
-    fun resetPortfolio() {
-        viewModelScope.launch {
-            try {
-                _portfolioState.value = _portfolioState.value.copy(isLoading = true)
-                resetPortfolioUseCase()
-                _portfolioState.value = PortfolioState(
-                    totalCash = 20000.0,
-                    totalInvestment = 0.0,
-                    lastUpdated = System.currentTimeMillis(),
-                    totalAmount = 0.0,
-                    currentPortfolioValue = 0.0,
-                    profitOrLoss = 0.0,
-                    performancePercentage = 0.0,
-
-                )
-            } catch (e: Exception) {
-                _portfolioState.value = PortfolioState(error = "Error resetting portfolio: ${e.message}")
-            }
-        }
-    }
-
 
     // Coin laden (zuerst aus Room, dann aus der API bei Bedarf)
     fun getCoin() {
@@ -220,24 +160,26 @@ class CoinViewModel (
                 _state.value = CoinState(isLoading = true)
 
                 // Daten aus Room laden
-                val localCoin = getCoinsUseCase.getCoinFromDatabase()
+                val localCoin = getCoinUseCase.getCoinFromDatabase()
                 if (localCoin != null) {
                     Log.d("CoinViewModel", "Loaded from Room: $localCoin")
                     _state.value = CoinState(coin = localCoin.toDomainModel())
                 }
 
                 // Wenn Room leer ist, API-Call durchführen
-                getCoinsUseCase.invoke().onEach { result ->
+                getCoinUseCase.invoke().onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             Log.d("API Request", "Data received: ${result.data}")
                             _state.value = CoinState(coin = result.data ?: Coin("", "", "", 0.0))
-                            calculatePortfolioPerformance(_state.value.coin.price)
                         }
+
                         is Resource.Error -> {
                             Log.e("API Request", "Error occurred: ${result.message}")
-                            _state.value = CoinState(error = result.message ?: "An unexpected error occurred")
+                            _state.value =
+                                CoinState(error = result.message ?: "An unexpected error occurred")
                         }
+
                         is Resource.Loading -> {
                             Log.d("API Request", "Loading from API...")
                             _state.value = CoinState(isLoading = true)
@@ -250,5 +192,4 @@ class CoinViewModel (
             }
         }
     }
-    
 }
