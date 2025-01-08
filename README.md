@@ -35,26 +35,26 @@ Base Block: Projektsetup und ViewModels
 Projektsetup:
 
     Das Projekt wurde in Android Studio erstellt und nutzt minSdk = 24, targetSdk = 34.
-    Kotlin als Programmiersprache verwendet.
-    Jetpack Compose statt XML und Navigation Components.
+    Kotlin wurde als Programmiersprache verwendet.
+    Jetpack Compose wird statt XML und Navigation Components.
 
 ViewModels:
 
-    ViewModels für verschiedene Screens (CoinViewModel, BuyViewModel, SellViewModel, SettingsViewModel) implementiert.
+    ViewModels für verschiedene Screens (CoinViewModel, BuyViewModel, SellViewModel, SettingsViewModel) wurden implementiert.
     Zugriff auf Repository-Klassen zur Datenlogik.
 
 Repository und Datenzugriff:
 
-    Repositories (PortfolioRepositoryImpl, InvestmentRepositoryImpl, CoinRepositoryImpl) für Lese- und Schreiboperationen erstellt.
+    Repositories (PortfolioRepositoryImpl, InvestmentRepositoryImpl, CoinRepositoryImpl) für Lese- und Schreiboperationen wurden erstellt.
     ViewModels nutzen diese Repositories, um Investments und Portfolio-Daten zu verwalten.
 
 Navigation:
 
-    Navigation zwischen Screens (HomeScreen, BuyScreen, SellScreen, SettingsScreen) mit Jetpack Compose's NavController implementiert.
+    Navigation wurde zwischen Screens (HomeScreen, BuyScreen, SellScreen, SettingsScreen) mit Jetpack Compose's NavController implementiert.
 
 Datenhandling:
 
-    Funktionen wie getCoin, refreshPortfolio, addInvestment, resetPortfolio für den Datenzugriff und die UI-Integration verwendet.
+    Funktionen wie getCoin, refreshPortfolio, addInvestment, resetPortfolio wurden für den Datenzugriff und die UI-Integration verwendet.
 
 Block 1: LiveData und Lifecycle Components
 
@@ -71,7 +71,7 @@ Block 2: SQL mit Google Room
 
 Setup:
 
-    Room-Datenbank (AppDatabase) erstellt und eingebunden.
+    Room-Datenbank (AppDatabase) wurde erstellt und eingebunden.
     
 Entities und DAOs:
 
@@ -87,7 +87,7 @@ Block 3: API Access und Serialization mit Retrofit
 
 API-Zugriff:
 
-    Retrofit statt Ktor (basierend auf Tutorial von Philipp Lackner) verwendet.
+    Retrofit wurde statt Ktor (basierend auf Tutorial von Philipp Lackner) verwendet.
     API-Modelle mit @SerializedName annotiert.
 
 INTERNET-Permission:
@@ -112,9 +112,9 @@ Singleton-Repositories:
 
 Block 5: Dependency Injection mit Koin (Google Room)
 
-    Room-Datenbank über Koin registriert.
+    Room-Datenbank wurde über Koin registriert.
     Room-Builder korrekt in Koin eingebunden, mit get() für den Android-Kontext.
-    MainActivity von der Room-Initialisierung befreit.
+    MainActivity wurde von der Room-Initialisierung befreit.
 
 Block 6: Concurrency mit Coroutines und Flow
 
