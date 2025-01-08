@@ -88,6 +88,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     //BottomNavigation Material
-    implementation("androidx.compose.material:material:1.7.5")
+    implementation(libs.androidx.material)
 
 }

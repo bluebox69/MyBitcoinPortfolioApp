@@ -10,11 +10,9 @@ import com.example.mybitcoinportolioapp.data.local.entities.InvestmentEntity
 import com.example.mybitcoinportolioapp.data.local.entities.toDomainModel
 import com.example.mybitcoinportolioapp.domain.model.Coin
 import com.example.mybitcoinportolioapp.domain.use_case.getCoin.GetCoinUseCase
-import com.example.mybitcoinportolioapp.domain.use_case.investment.AddInvestmentUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.investment.GetInvestmentsUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.InitializePortfolioUseCase
 import com.example.mybitcoinportolioapp.domain.use_case.portfolio.ResetPortfolioUseCase
-import com.example.mybitcoinportolioapp.domain.use_case.portfolio.UpdatePortfolioUseCase
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.CoinState
 import com.example.mybitcoinportolioapp.presentation.homeScreen.state.PortfolioState
 import kotlinx.coroutines.flow.MutableStateFlow
